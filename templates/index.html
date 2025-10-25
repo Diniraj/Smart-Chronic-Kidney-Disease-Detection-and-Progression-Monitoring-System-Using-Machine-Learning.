@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Smart CKD Health Management{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4" data-translate="hero_title">Smart CKD Health Management</h1>
+                <p class="lead mb-4" data-translate="hero_subtitle">AI-powered Chronic Kidney Disease detection and personalized health management system.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i><span data-translate="get_started">Get Started</span>
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i><span data-translate="login">Login</span>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <i class="fas fa-heartbeat display-1 text-white-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3" data-translate="key_features">Key Features</h2>
+                <p class="lead text-muted" data-translate="features_subtitle">Comprehensive CKD management with cutting-edge AI technology</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-brain text-primary display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="ai_detection">AI-Powered Detection</h4>
+                    <p class="text-muted" data-translate="ai_detection_desc">Advanced machine learning algorithms with 98% accuracy for CKD prediction using Random Forest model.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-utensils text-success display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="personalized_diet_plans">Personalized Diet Plans</h4>
+                    <p class="text-muted" data-translate="personalized_diet_plans_desc">Stage-specific diet recommendations tailored to your CKD condition and health requirements.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-dumbbell text-warning display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="exercise_recommendations">Exercise Recommendations</h4>
+                    <p class="text-muted" data-translate="exercise_recommendations_desc">Customized exercise plans based on your CKD stage and physical condition.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-robot text-info display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="ai_health_assistant">AI Health Assistant</h4>
+                    <p class="text-muted" data-translate="ai_health_assistant_desc">24/7 AI chatbot powered by Gemini for health queries and guidance in English and Kannada.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-chart-line text-danger display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="doctor_analytics">Doctor Analytics</h4>
+                    <p class="text-muted" data-translate="doctor_analytics_desc">Comprehensive analytics dashboard for healthcare providers to monitor patient progress.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card h-100 p-4 border rounded-3 shadow-sm">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-file-pdf text-secondary display-4"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3" data-translate="automated_reports">Automated Reports</h4>
+                    <p class="text-muted" data-translate="automated_reports_desc">Generate and email detailed health reports with predictions and recommendations.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Stack -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-3" data-translate="technology_stack">Technology Stack</h2>
+                <p class="lead text-muted" data-translate="tech_subtitle">Built with modern technologies for optimal performance</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="tech-item text-center">
+                    <i class="fab fa-python text-primary display-4 mb-3"></i>
+                    <h5 data-translate="python_flask">Python & Flask</h5>
+                    <p class="text-muted small" data-translate="backend_framework">Backend Framework</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="tech-item text-center">
+                    <i class="fas fa-database text-success display-4 mb-3"></i>
+                    <h5 data-translate="mongodb">MongoDB</h5>
+                    <p class="text-muted small" data-translate="database">Database</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="tech-item text-center">
+                    <i class="fas fa-brain text-warning display-4 mb-3"></i>
+                    <h5 data-translate="scikit_learn">Scikit-learn</h5>
+                    <p class="text-muted small" data-translate="machine_learning">Machine Learning</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3 col-sm-6">
+                <div class="tech-item text-center">
+                    <i class="fas fa-robot text-info display-4 mb-3"></i>
+                    <h5 data-translate="gemini_ai">Gemini AI</h5>
+                    <p class="text-muted small" data-translate="ai_assistant">AI Assistant</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3" data-translate="ready_to_get_started">Ready to Get Started?</h2>
+        <p class="lead mb-4" data-translate="join_thousands">Join thousands of patients and doctors using our Smart CKD Health Management system.</p>
+        <div class="d-flex gap-3 justify-content-center">
+            <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg">
+                <i class="fas fa-user-plus me-2"></i><span data-translate="sign_up_as_patient">Sign Up as Patient</span>
+            </a>
+            <a href="{{ url_for('signup') }}" class="btn btn-outline-light btn-lg">
+                <i class="fas fa-user-md me-2"></i><span data-translate="sign_up_as_doctor">Sign Up as Doctor</span>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize theme and language from localStorage
+document.addEventListener('DOMContentLoaded', function() {
+    initializeTheme();
+    initializeLanguage();
+});
+</script>
+{% endblock %}

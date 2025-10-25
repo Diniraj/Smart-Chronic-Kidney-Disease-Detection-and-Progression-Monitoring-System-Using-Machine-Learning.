@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Report - Smart CKD Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>Smart CKD Management</span>
+                </div>
+                <nav class="nav">
+                    <a href="{{ url_for('patient_dashboard') }}" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="report-container">
+                <div class="report-header">
+                    <h1><i class="fas fa-file-medical"></i> Health Report</h1>
+                    <div class="report-actions">
+                        <button id="downloadBtn" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download PDF
+                        </button>
+                        <button id="emailBtn" class="btn btn-secondary">
+                            <i class="fas fa-envelope"></i> Send Email
+                        </button>
+                        <button id="printBtn" class="btn btn-outline">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Report Content -->
+                <div class="report-content" id="reportContent">
+                    <!-- Patient Information -->
+                    <section class="report-section">
+                        <h2><i class="fas fa-user"></i> Patient Information</h2>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Name:</label>
+                                <span id="patientName">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Email:</label>
+                                <span id="patientEmail">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Phone:</label>
+                                <span id="patientPhone">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Age:</label>
+                                <span id="patientAge">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Gender:</label>
+                                <span id="patientGender">Loading...</span>
+                            </div>
+                            <div class="info-item">
+                                <label>Report Date:</label>
+                                <span id="reportDate">Loading...</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Prediction Results -->
+                    <section class="report-section">
+                        <h2><i class="fas fa-chart-line"></i> CKD Prediction Results</h2>
+                        <div class="prediction-results">
+                            <div class="result-card">
+                                <div class="result-item">
+                                    <label>CKD Status:</label>
+                                    <span id="ckdStatus" class="status-badge">Loading...</span>
+                                </div>
+                                <div class="result-item">
+                                    <label>CKD Stage:</label>
+                                    <span id="ckdStage" class="stage-badge">Loading...</span>
+                                </div>
+                                <div class="result-item">
+                                    <label>Confidence Score:</label>
+                                    <span id="confidenceScore" class="confidence-badge">Loading...</span>
+                                </div>
+                                <div class="result-item">
+                                    <label>Risk Level:</label>
+                                    <span id="riskLevel" class="risk-badge">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Health Parameters -->
+                    <section class="report-section">
+                        <h2><i class="fas fa-vial"></i> Health Parameters</h2>
+                        <div class="parameters-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                        <th>Normal Range</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parametersTable">
+                                    <!-- Parameters will be loaded dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Recommendations -->
+                    <section class="report-section">
+                        <h2><i class="fas fa-lightbulb"></i> Personalized Recommendations</h2>
+                        
+                        <!-- Diet Plan -->
+                        <div class="recommendation-card">
+                            <h3><i class="fas fa-utensils"></i> Diet Plan</h3>
+                            <div class="diet-plan" id="dietPlan">
+                                <!-- Diet plan will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Exercise Plan -->
+                        <div class="recommendation-card">
+                            <h3><i class="fas fa-dumbbell"></i> Exercise Plan</h3>
+                            <div class="exercise-plan" id="exercisePlan">
+                                <!-- Exercise plan will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Lifestyle Tips -->
+                        <div class="recommendation-card">
+                            <h3><i class="fas fa-heart"></i> Lifestyle Tips</h3>
+                            <div class="lifestyle-tips" id="lifestyleTips">
+                                <!-- Lifestyle tips will be loaded dynamically -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- AI Recommendations -->
+                    <section class="report-section">
+                        <h2><i class="fas fa-robot"></i> AI-Powered Insights</h2>
+                        <div class="ai-recommendations" id="aiRecommendations">
+                            <!-- AI recommendations will be loaded dynamically -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Smart CKD Health Management System. All rights reserved.</p>
+                <p>Report generated on: <span id="generationTime"></span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Generating report...</p>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Report-specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const predictionId = urlParams.get('prediction_id');
+            
+            if (predictionId) {
+                loadReportData(predictionId);
+            } else {
+                showMessage('No prediction ID provided', 'error');
+            }
+        });
+
+        function loadReportData(predictionId) {
+            showLoading();
+            
+            // Load prediction data
+            fetch(`/api/predict/${predictionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showMessage(data.error, 'error');
+                        return;
+                    }
+                    
+                    populateReportData(data);
+                    hideLoading();
+                })
+                .catch(error => {
+                    showMessage('Error loading report data: ' + error.message, 'error');
+                    hideLoading();
+                });
+        }
+
+        function populateReportData(data) {
+            // Populate patient information
+            document.getElementById('patientName').textContent = data.patient_name || 'N/A';
+            document.getElementById('patientEmail').textContent = data.patient_email || 'N/A';
+            document.getElementById('patientPhone').textContent = data.patient_phone || 'N/A';
+            document.getElementById('patientAge').textContent = data.patient_age || 'N/A';
+            document.getElementById('patientGender').textContent = data.patient_gender || 'N/A';
+            document.getElementById('reportDate').textContent = new Date().toLocaleDateString();
+            document.getElementById('generationTime').textContent = new Date().toLocaleString();
+
+            // Populate prediction results
+            document.getElementById('ckdStatus').textContent = data.ckd_detected ? 'CKD Detected' : 'No CKD';
+            document.getElementById('ckdStatus').className = `status-badge ${data.ckd_detected ? 'ckd-detected' : 'no-ckd'}`;
+            document.getElementById('ckdStage').textContent = data.ckd_stage;
+            document.getElementById('confidenceScore').textContent = data.confidence ? (data.confidence * 100).toFixed(1) + '%' : 'N/A';
+            document.getElementById('riskLevel').textContent = data.risk_level;
+            document.getElementById('riskLevel').className = `risk-badge ${data.risk_level.toLowerCase()}`;
+
+            // Populate health parameters
+            populateHealthParameters(data.health_parameters);
+
+            // Populate recommendations
+            populateRecommendations(data.diet_plan, data.exercise_plan, data.lifestyle_tips);
+        }
+
+        function populateHealthParameters(parameters) {
+            const tbody = document.getElementById('parametersTable');
+            tbody.innerHTML = '';
+
+            const parameterList = [
+                { name: 'Age', value: parameters.age, normal: 'N/A', status: 'normal' },
+                { name: 'Gender', value: parameters.gender, normal: 'M/F', status: 'normal' },
+                { name: 'Blood Pressure (mmHg)', value: parameters.blood_pressure, normal: '< 140/90', status: getParameterStatus(parameters.blood_pressure, 140) },
+                { name: 'Sugar Level (mg/dL)', value: parameters.sugar_level, normal: '< 126', status: getParameterStatus(parameters.sugar_level, 126) },
+                { name: 'Albumin (g/dL)', value: parameters.albumin, normal: '3.5-5.0', status: getParameterStatus(parameters.albumin, 3.5, 5.0) },
+                { name: 'Serum Creatinine (mg/dL)', value: parameters.serum_creatinine, normal: '0.6-1.2', status: getParameterStatus(parameters.serum_creatinine, 0.6, 1.2) },
+                { name: 'Sodium (mEq/L)', value: parameters.sodium, normal: '136-145', status: getParameterStatus(parameters.sodium, 136, 145) },
+                { name: 'Potassium (mEq/L)', value: parameters.potassium, normal: '3.5-5.0', status: getParameterStatus(parameters.potassium, 3.5, 5.0) },
+                { name: 'Hemoglobin (g/dL)', value: parameters.hemoglobin, normal: '12-16', status: getParameterStatus(parameters.hemoglobin, 12, 16) },
+                { name: 'BUN (mg/dL)', value: parameters.bun, normal: '7-20', status: getParameterStatus(parameters.bun, 7, 20) },
+                { name: 'eGFR (mL/min/1.73m²)', value: parameters.egfr, normal: '> 90', status: getParameterStatus(parameters.egfr, 90, null, true) },
+                { name: 'ACR (mg/g)', value: parameters.acr, normal: '< 30', status: getParameterStatus(parameters.acr, 30) },
+                { name: 'UCR (mg/g)', value: parameters.ucr, normal: 'N/A', status: 'normal' }
+            ];
+
+            parameterList.forEach(param => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${param.name}</td>
+                    <td>${param.value || 'N/A'}</td>
+                    <td>${param.normal}</td>
+                    <td><span class="status-indicator ${param.status}">${param.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getParameterStatus(value, min, max = null, reverse = false) {
+            if (!value) return 'normal';
+            
+            if (reverse) {
+                return value >= min ? 'normal' : 'abnormal';
+            } else if (max) {
+                return (value >= min && value <= max) ? 'normal' : 'abnormal';
+            } else {
+                return value <= min ? 'normal' : 'abnormal';
+            }
+        }
+
+        function populateRecommendations(dietPlan, exercisePlan, lifestyleTips) {
+            // Populate diet plan
+            const dietContainer = document.getElementById('dietPlan');
+            dietContainer.innerHTML = '';
+            
+            if (dietPlan) {
+                Object.entries(dietPlan).forEach(([meal, food]) => {
+                    const mealDiv = document.createElement('div');
+                    mealDiv.className = 'meal-item';
+                    mealDiv.innerHTML = `
+                        <strong>${meal.charAt(0).toUpperCase() + meal.slice(1)}:</strong>
+                        <span>${food}</span>
+                    `;
+                    dietContainer.appendChild(mealDiv);
+                });
+            }
+
+            // Populate exercise plan
+            const exerciseContainer = document.getElementById('exercisePlan');
+            exerciseContainer.innerHTML = '';
+            
+            if (exercisePlan) {
+                Object.entries(exercisePlan).forEach(([key, value]) => {
+                    const exerciseDiv = document.createElement('div');
+                    exerciseDiv.className = 'exercise-item';
+                    exerciseDiv.innerHTML = `
+                        <strong>${key.replace('_', ' ').charAt(0).toUpperCase() + key.replace('_', ' ').slice(1)}:</strong>
+                        <span>${Array.isArray(value) ? value.join(', ') : value}</span>
+                    `;
+                    exerciseContainer.appendChild(exerciseDiv);
+                });
+            }
+
+            // Populate lifestyle tips
+            const tipsContainer = document.getElementById('lifestyleTips');
+            tipsContainer.innerHTML = '';
+            
+            if (lifestyleTips && Array.isArray(lifestyleTips)) {
+                lifestyleTips.forEach((tip, index) => {
+                    const tipDiv = document.createElement('div');
+                    tipDiv.className = 'tip-item';
+                    tipDiv.innerHTML = `
+                        <span class="tip-number">${index + 1}.</span>
+                        <span class="tip-text">${tip}</span>
+                    `;
+                    tipsContainer.appendChild(tipDiv);
+                });
+            }
+        }
+
+        // Event listeners
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const predictionId = urlParams.get('prediction_id');
+            
+            if (predictionId) {
+                window.open(`/api/download-report/${predictionId}`, '_blank');
+            }
+        });
+
+        document.getElementById('emailBtn').addEventListener('click', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const predictionId = urlParams.get('prediction_id');
+            
+            if (predictionId) {
+                showLoading();
+                fetch(`/api/send-report-email/${predictionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showMessage('Report sent via email successfully!', 'success');
+                    } else {
+                        showMessage('Failed to send email: ' + data.error, 'error');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showMessage('Error sending email: ' + error.message, 'error');
+                });
+            }
+        });
+
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showMessage(message, type) {
+            const container = document.getElementById('messageContainer');
+            container.innerHTML = `
+                <div class="message ${type}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

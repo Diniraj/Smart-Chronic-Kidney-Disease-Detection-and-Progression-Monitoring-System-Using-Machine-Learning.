@@ -1,0 +1,1216 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - Smart CKD Health Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview" onclick="showSection('overview')">
+                            <i class="fas fa-tachometer-alt me-2"></i><span data-translate="overview">Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#prediction" onclick="showSection('prediction')">
+                            <i class="fas fa-brain me-2"></i><span data-translate="new_prediction">New Prediction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#history" onclick="showSection('history')">
+                            <i class="fas fa-history me-2"></i><span data-translate="prediction_history">Prediction History</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#recommendations" onclick="showSection('recommendations')">
+                            <i class="fas fa-utensils me-2"></i><span data-translate="recommendations">Recommendations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#messages" onclick="showSection('messages')">
+                            <i class="fas fa-envelope me-2"></i><span data-translate="messages">Messages</span>
+                            <span class="badge bg-warning ms-1" id="unreadMessagesBadge" style="display: none;">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#trends" onclick="showSection('trends')">
+                            <i class="fas fa-chart-line me-2"></i><span data-translate="health_trends">Health Trends</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#chat" onclick="showSection('chat')">
+                            <i class="fas fa-robot me-2"></i><span data-translate="ai_assistant">AI Assistant</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <!-- Overview Section -->
+            <div id="overview" class="content-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">Welcome, {{ patient.personal_info.name if patient else 'Patient' }}!</h2>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary" onclick="showSection('prediction')">
+                            <i class="fas fa-plus me-2"></i><span data-translate="new_prediction">New Prediction</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-chart-line fa-2x me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0">{{ predictions|length if predictions else 0 }}</h4>
+                                        <small data-translate="total_predictions">Total Predictions</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-heart fa-2x me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0" data-translate="healthy">Healthy</h4>
+                                        <small data-translate="current_status">Current Status</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-calendar fa-2x me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0">{{ patient.created_at.strftime('%d/%m/%Y') if patient else 'N/A' }}</h4>
+                                        <small data-translate="member_since">Member Since</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-bell fa-2x me-3"></i>
+                                    <div>
+                                        <h4 class="mb-0" id="unreadMsgCount">0</h4>
+                                        <small>Doctor Messages</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Predictions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0" data-translate="recent_predictions">Recent Predictions</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if predictions %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th data-translate="date">Date</th>
+                                            <th data-translate="ckd_status">CKD Status</th>
+                                            <th data-translate="stage">Stage</th>
+                                            <th data-translate="confidence">Confidence</th>
+                                            <th data-translate="risk_level">Risk Level</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for pred in predictions %}
+                                        <tr>
+                                            <td>{{ pred.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if pred.prediction_result.ckd_binary else 'success' }}">
+                                                    {{ 'CKD Detected' if pred.prediction_result.ckd_binary else 'No CKD' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ pred.prediction_result.ckd_stage }}</td>
+                                            <td>{{ (pred.prediction_result.confidence * 100)|round(1) if pred.prediction_result.confidence else 'N/A' }}%</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if pred.prediction_result.risk_level == 'High' else 'warning' if pred.prediction_result.risk_level == 'Medium' else 'success' }}">
+                                                    {{ pred.prediction_result.risk_level }}
+                                                </span>
+                                            </td>
+                                            <td class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="generateReport('{{ pred.prediction_id }}')">
+                                                    <i class="fas fa-file-pdf me-1"></i><span data-translate="report">Report</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted" data-translate="no_predictions_yet">No predictions yet</h5>
+                                <p class="text-muted" data-translate="start_prediction">Start by making your first CKD prediction!</p>
+                                <button class="btn btn-primary" onclick="showSection('prediction')">
+                                    <i class="fas fa-plus me-2"></i><span data-translate="make_prediction">Make Prediction</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Section -->
+            <div id="prediction" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-translate="ckd_prediction">CKD Prediction</h2>
+                    <button class="btn btn-outline-secondary" onclick="showSection('overview')">
+                        <i class="fas fa-arrow-left me-2"></i><span data-translate="back_to_overview">Back to Overview</span>
+                    </button>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0" data-translate="enter_health_parameters">Enter Health Parameters</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="predictionForm">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="age" class="form-label" data-translate="age_range">Age (Range: 20-90)</label>
+<input type="number" class="form-control" id="age" name="age" placeholder="65" min="20" max="90" required onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="gender" class="form-label" data-translate="gender">Gender</label>
+<select class="form-select" id="gender" name="gender" required onkeydown="focusNextOnEnter(event)">
+                                                <option value="" data-translate="select_gender">Select Gender</option>
+                                                <option value="M" data-translate="male">Male</option>
+                                                <option value="F" data-translate="female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="blood_pressure" class="form-label" data-translate="blood_pressure_range">Blood Pressure (mmHg) (Range: 80-200)</label>
+<input type="number" class="form-control" id="blood_pressure" name="blood_pressure" placeholder="140" min="80" max="200" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="sugar_level" class="form-label" data-translate="sugar_level_range">Sugar Level (mg/dL) (Range: 70-300)</label>
+<input type="number" class="form-control" id="sugar_level" name="sugar_level" placeholder="120" min="70" max="300" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="albumin" class="form-label" data-translate="albumin_range">Albumin (g/dL) (Range: 1.0-5.0)</label>
+<input type="number" class="form-control" id="albumin" name="albumin" placeholder="3.5" min="1.0" max="5.0" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="serum_creatinine" class="form-label" data-translate="serum_creatinine_range">Serum Creatinine (mg/dL) (Range: 0.5-10.0)</label>
+<input type="number" class="form-control" id="serum_creatinine" name="serum_creatinine" placeholder="1.2" min="0.5" max="10.0" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="sodium" class="form-label" data-translate="sodium_range">Sodium (mEq/L) (Range: 120-160)</label>
+<input type="number" class="form-control" id="sodium" name="sodium" placeholder="140" min="120" max="160" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="potassium" class="form-label" data-translate="potassium_range">Potassium (mEq/L) (Range: 2.0-6.0)</label>
+<input type="number" class="form-control" id="potassium" name="potassium" placeholder="4.0" min="2.0" max="6.0" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="hemoglobin" class="form-label" data-translate="hemoglobin_range">Hemoglobin (g/dL) (Range: 8-18)</label>
+<input type="number" class="form-control" id="hemoglobin" name="hemoglobin" placeholder="12.0" min="8" max="18" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="bun" class="form-label" data-translate="bun_range">BUN (mg/dL) (Range: 5-50)</label>
+<input type="number" class="form-control" id="bun" name="bun" placeholder="20" min="5" max="50" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="egfr" class="form-label" data-translate="egfr_range">eGFR (mL/min/1.73m²) (Range: 10-120)</label>
+<input type="number" class="form-control" id="egfr" name="egfr" placeholder="60" min="10" max="120" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="acr" class="form-label" data-translate="acr_range">ACR (mg/g) (Range: 0-500)</label>
+<input type="number" class="form-control" id="acr" name="acr" placeholder="30" min="0" max="500" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="ucr" class="form-label" data-translate="ucr_range">UCR (mg/g) (Range: 0-50)</label>
+<input type="number" class="form-control" id="ucr" name="ucr" placeholder="15" min="0" max="50" step="0.01" onkeydown="focusNextOnEnter(event)">
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <div class="btn-group" role="group">
+                                            <button type="button" class="btn btn-outline-info" onclick="fillSampleData('normal')">
+                                                <i class="fas fa-flask me-2"></i><span data-translate="normal_case">Normal Case</span>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-warning" onclick="fillSampleData('ckd')">
+                                                <i class="fas fa-exclamation-triangle me-2"></i><span data-translate="ckd_case">CKD Case</span>
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger" onclick="fillSampleData('severe')">
+                                                <i class="fas fa-heartbeat me-2"></i><span data-translate="severe_ckd">Severe CKD</span>
+                                            </button>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-brain me-2"></i><span data-translate="predict_ckd_status">Predict CKD Status</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0" data-translate="prediction_results">Prediction Results</h5>
+                            </div>
+                            <div class="card-body" id="predictionResults">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-chart-line fa-3x mb-3"></i>
+                                    <p data-translate="submit_form_message">Submit the form to see prediction results</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="history" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-translate="prediction_history">Prediction History</h2>
+                    <button class="btn btn-outline-secondary" onclick="showSection('overview')">
+                        <i class="fas fa-arrow-left me-2"></i><span data-translate="back_to_overview">Back to Overview</span>
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        {% if predictions %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th data-translate="date">Date</th>
+                                            <th data-translate="ckd_status">CKD Status</th>
+                                            <th data-translate="stage">Stage</th>
+                                            <th data-translate="confidence">Confidence</th>
+                                            <th data-translate="risk_level">Risk Level</th>
+                                            <th data-translate="actions">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for pred in predictions %}
+                                        <tr>
+                                            <td>{{ pred.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if pred.prediction_result.ckd_binary else 'success' }}">
+                                                    {{ 'CKD Detected' if pred.prediction_result.ckd_binary else 'No CKD' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ pred.prediction_result.ckd_stage }}</td>
+                                            <td>{{ (pred.prediction_result.confidence * 100)|round(1) if pred.prediction_result.confidence else 'N/A' }}%</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'danger' if pred.prediction_result.risk_level == 'High' else 'warning' if pred.prediction_result.risk_level == 'Medium' else 'success' }}">
+                                                    {{ pred.prediction_result.risk_level }}
+                                                </span>
+                                            </td>
+                                            <td class="d-flex gap-2">
+                                                <button class="btn btn-sm btn-outline-primary" onclick="generateReport('{{ pred.prediction_id }}')">
+                                                    <i class="fas fa-file-pdf me-1"></i><span data-translate="report">Report</span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted" data-translate="no_prediction_history">No prediction history</h5>
+                                <p class="text-muted" data-translate="make_first_prediction">Make your first prediction to see history here.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div id="recommendations" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-translate="health_recommendations">Health Recommendations</h2>
+                    <button class="btn btn-outline-secondary" onclick="showSection('overview')">
+                        <i class="fas fa-arrow-left me-2"></i><span data-translate="back_to_overview">Back to Overview</span>
+                    </button>
+                </div>
+
+                {% if recommendations %}
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-utensils me-2"></i><span data-translate="diet_plan">Diet Plan</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="text-muted mb-3" data-translate="ckd_stage">CKD Stage: {{ recommendations.ckd_stage }}</h6>
+                                {% for meal, food in recommendations.diet_plan.items() %}
+                                <div class="mb-3">
+                                    <strong>{{ meal.title() }}:</strong>
+                                    <p class="text-muted mb-0">{{ food }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-dumbbell me-2"></i><span data-translate="exercise_plan">Exercise Plan</span></h5>
+                            </div>
+                            <div class="card-body">
+                                {% for key, value in recommendations.exercise_plan.items() %}
+                                <div class="mb-3">
+                                    <strong>{{ key.replace('_', ' ').title() }}:</strong>
+                                    <p class="text-muted mb-0">{{ value }}</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i><span data-translate="lifestyle_tips">Lifestyle Tips</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    {% for tip in recommendations.lifestyle_tips %}
+                                    <li class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-2"></i>{{ tip }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-utensils fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted" data-translate="no_recommendations_available">No recommendations available</h5>
+                    <p class="text-muted" data-translate="make_prediction_to_get_recommendations">Make a prediction to get personalized recommendations.</p>
+                    <button class="btn btn-primary" onclick="showSection('prediction')">
+                        <i class="fas fa-plus me-2"></i><span data-translate="make_prediction">Make Prediction</span>
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Messages Section -->
+            <div id="messages" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold"><i class="fas fa-envelope me-2"></i><span data-translate="doctor_messages">Doctor Messages</span></h2>
+                    <button class="btn btn-outline-primary" onclick="loadMessages()">
+                        <i class="fas fa-sync-alt me-2"></i><span data-translate="refresh">Refresh</span>
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><span data-translate="messages_from_doctor">Messages from Doctor</span></h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="messagesList">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-spinner fa-spin me-2"></i><span data-translate="loading_messages">Loading messages...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Trends Section -->
+            <div id="trends" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold"><i class="fas fa-chart-line me-2"></i><span data-translate="health_trends">Health Trends</span></h2>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="trendPeriod" onchange="loadTrends()">
+                            <option value="30"><span data-translate="last_30_days">Last 30 Days</span></option>
+                            <option value="90"><span data-translate="last_90_days">Last 90 Days</span></option>
+                            <option value="365"><span data-translate="last_year">Last Year</span></option>
+                        </select>
+                        <button class="btn btn-outline-primary" onclick="loadTrends()">
+                            <i class="fas fa-sync-alt me-2"></i><span data-translate="refresh">Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><span data-translate="egfr_trend">eGFR Trend</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="egfrTrendChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><span data-translate="risk_alerts">Risk Alerts</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="riskAlerts">
+                                    <div class="text-center text-muted">
+                                        <i class="fas fa-spinner fa-spin me-2"></i><span data-translate="loading_alerts">Loading alerts...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><span data-translate="blood_pressure_trend">Blood Pressure Trend</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="bpTrendChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><span data-translate="acr_trend">ACR Trend</span></h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="acrTrendChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Section -->
+            <div id="chat" class="content-section" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold" data-translate="chat_with_ai_assistant">AI Health Assistant</h2>
+                    <button class="btn btn-outline-secondary" onclick="showSection('overview')">
+                        <i class="fas fa-arrow-left me-2"></i><span data-translate="back_to_overview">Back to Overview</span>
+                    </button>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-robot me-2"></i><span data-translate="chat_with_ai_assistant">Chat with AI Assistant</span>
+                                    <small class="text-muted" data-translate="powered_by_gemini">Powered by Gemini AI</small>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="chatMessages" class="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; padding: 15px; margin-bottom: 15px;">
+                                    <div class="message bot-message">
+                                        <div class="message-content">
+                                            <strong>AI Assistant:</strong> <span data-translate="hello_ai_assistant">Hello! I'm your AI health assistant. How can I help you with CKD-related questions or general health advice?</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="chatInput" placeholder="Type your message here..." data-translate="type_your_message_here">
+                                    <button class="btn btn-primary" onclick="sendMessage()">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0" data-translate="quick_questions">Quick Questions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('What are the symptoms of CKD?')" data-translate="what_are_ckd_symptoms">
+                                        What are the symptoms of CKD?
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('What foods should I avoid with CKD?')" data-translate="what_foods_avoid_ckd">
+                                        What foods should I avoid with CKD?
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('How can I prevent CKD progression?')" data-translate="how_prevent_ckd_progression">
+                                        How can I prevent CKD progression?
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="askQuestion('What exercises are safe for CKD patients?')" data-translate="what_exercises_safe_ckd">
+                                        What exercises are safe for CKD patients?
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showSection(sectionId) {
+    // Hide all sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.style.display = 'none';
+    });
+    
+    // Show selected section
+    document.getElementById(sectionId).style.display = 'block';
+    
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+
+// Fill sample data for demo
+function fillSampleData(type = 'normal') {
+    const sampleData = {
+        normal: {
+            age: '45',
+            gender: 'F',
+            blood_pressure: '120',
+            sugar_level: '90',
+            albumin: '4.2',
+            serum_creatinine: '0.8',
+            sodium: '142',
+            potassium: '4.2',
+            hemoglobin: '14.5',
+            bun: '12',
+            egfr: '95',
+            acr: '10',
+            ucr: '8'
+        },
+        ckd: {
+            age: '65',
+            gender: 'M',
+            blood_pressure: '140',
+            sugar_level: '120',
+            albumin: '3.5',
+            serum_creatinine: '1.2',
+            sodium: '140',
+            potassium: '4.0',
+            hemoglobin: '12.0',
+            bun: '20',
+            egfr: '60',
+            acr: '30',
+            ucr: '15'
+        },
+        severe: {
+            age: '72',
+            gender: 'M',
+            blood_pressure: '160',
+            sugar_level: '150',
+            albumin: '2.8',
+            serum_creatinine: '2.5',
+            sodium: '135',
+            potassium: '5.2',
+            hemoglobin: '9.5',
+            bun: '35',
+            egfr: '25',
+            acr: '120',
+            ucr: '35'
+        }
+    };
+    
+    const data = sampleData[type] || sampleData.normal;
+    
+    document.getElementById('age').value = data.age;
+    document.getElementById('gender').value = data.gender;
+    document.getElementById('blood_pressure').value = data.blood_pressure;
+    document.getElementById('sugar_level').value = data.sugar_level;
+    document.getElementById('albumin').value = data.albumin;
+    document.getElementById('serum_creatinine').value = data.serum_creatinine;
+    document.getElementById('sodium').value = data.sodium;
+    document.getElementById('potassium').value = data.potassium;
+    document.getElementById('hemoglobin').value = data.hemoglobin;
+    document.getElementById('bun').value = data.bun;
+    document.getElementById('egfr').value = data.egfr;
+    document.getElementById('acr').value = data.acr;
+    document.getElementById('ucr').value = data.ucr;
+}
+
+// Prediction form handling
+document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    // Debug: Log the form data
+    console.log('Form data being sent:', data);
+    
+    try {
+        const response = await fetch('/api/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            displayPredictionResults(result);
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+});
+
+// Load unread doctor messages count
+async function loadUnreadMessages() {
+    try {
+        const res = await fetch('/api/messages', { credentials: 'same-origin' });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            const unread = (data.messages || []).filter(m => !m.read).length;
+            const el = document.getElementById('unreadMsgCount');
+            if (el) el.textContent = unread;
+        }
+    } catch {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadUnreadMessages();
+    loadTrends();
+});
+
+// Load messages for patient
+async function loadMessages() {
+    try {
+        const response = await fetch('/api/messages', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin'
+        });
+        
+        const data = await response.json();
+        const messagesList = document.getElementById('messagesList');
+        
+        if (data.success && data.messages) {
+            if (data.messages.length === 0) {
+                messagesList.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-envelope-open fa-3x mb-3"></i>
+                        <p>No messages from doctor yet.</p>
+                    </div>
+                `;
+            } else {
+                messagesList.innerHTML = data.messages.map(msg => `
+                    <div class="card mb-3 ${msg.read ? '' : 'border-warning'}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user-md me-2"></i>Doctor Message
+                                        ${!msg.read ? '<span class="badge bg-warning ms-2">New</span>' : ''}
+                                    </h6>
+                                    <p class="card-text">${msg.content}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>${msg.created_at}
+                                    </small>
+                                </div>
+                                <div class="ms-3">
+                                    ${!msg.read ? `
+                                        <button class="btn btn-sm btn-outline-primary" onclick="markAsRead('${msg.message_id}')">
+                                            <i class="fas fa-check me-1"></i>Mark as Read
+                                        </button>
+                                    ` : `
+                                        <span class="text-success">
+                                            <i class="fas fa-check-circle me-1"></i>Read
+                                        </span>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        } else {
+            messagesList.innerHTML = `
+                <div class="text-center text-danger py-4">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <p>Error loading messages: ${data.error || 'Unknown error'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+        document.getElementById('messagesList').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <p>Error loading messages: ${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Mark message as read
+async function markAsRead(messageId) {
+    try {
+        const response = await fetch(`/api/messages/${messageId}/read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin'
+        });
+        
+        if (response.ok) {
+            loadMessages(); // Reload messages
+            loadUnreadMessages(); // Update unread count
+        } else {
+            alert('Error marking message as read');
+        }
+    } catch (error) {
+        console.error('Error marking message as read:', error);
+        alert('Error marking message as read');
+    }
+}
+
+// Load health trends
+async function loadTrends() {
+    const period = document.getElementById('trendPeriod').value;
+    
+    try {
+        const response = await fetch(`/api/patient/trends?period=${period}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin'
+        });
+        
+        const data = await response.json();
+        console.log('Trends API response:', data);
+        
+        if (data.success) {
+            updateTrendCharts(data);
+            updateRiskAlerts(data.risk_alerts);
+        } else {
+            console.error('Error loading trends:', data.error);
+        }
+    } catch (error) {
+        console.error('Error loading trends:', error);
+    }
+}
+
+// Update trend charts
+function updateTrendCharts(data) {
+    // Destroy existing charts if they exist
+    if (window.egfrChart) window.egfrChart.destroy();
+    if (window.bpChart) window.bpChart.destroy();
+    if (window.acrChart) window.acrChart.destroy();
+    
+    // eGFR Trend Chart
+    const egfrCtx = document.getElementById('egfrTrendChart').getContext('2d');
+    const egfrLabels = data.egfr_trend?.labels || [];
+    const egfrValues = data.egfr_trend?.values || [];
+    
+    if (egfrLabels.length === 0) {
+        egfrCtx.canvas.parentNode.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-chart-line fa-3x mb-3"></i><p>No eGFR data available for the selected period</p></div>';
+    } else {
+        window.egfrChart = new Chart(egfrCtx, {
+            type: 'line',
+            data: {
+                labels: egfrLabels,
+                datasets: [{
+                    label: 'eGFR',
+                    data: egfrValues,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'eGFR (mL/min/1.73m²)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // Blood Pressure Trend Chart
+    const bpCtx = document.getElementById('bpTrendChart').getContext('2d');
+    const bpLabels = data.bp_trend?.labels || [];
+    const bpSystolic = data.bp_trend?.systolic || [];
+    const bpDiastolic = data.bp_trend?.diastolic || [];
+    
+    if (bpLabels.length === 0) {
+        bpCtx.canvas.parentNode.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-chart-line fa-3x mb-3"></i><p>No blood pressure data available for the selected period</p></div>';
+    } else {
+        window.bpChart = new Chart(bpCtx, {
+            type: 'line',
+            data: {
+                labels: bpLabels,
+                datasets: [
+                    {
+                        label: 'Systolic',
+                        data: bpSystolic,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: 'Diastolic',
+                        data: bpDiastolic,
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'Blood Pressure (mmHg)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+    
+    // ACR Trend Chart
+    const acrCtx = document.getElementById('acrTrendChart').getContext('2d');
+    const acrLabels = data.acr_trend?.labels || [];
+    const acrValues = data.acr_trend?.values || [];
+    
+    if (acrLabels.length === 0) {
+        acrCtx.canvas.parentNode.innerHTML = '<div class="text-center text-muted py-4"><i class="fas fa-chart-line fa-3x mb-3"></i><p>No ACR data available for the selected period</p></div>';
+    } else {
+        window.acrChart = new Chart(acrCtx, {
+            type: 'line',
+            data: {
+                labels: acrLabels,
+                datasets: [{
+                    label: 'ACR',
+                    data: acrValues,
+                    borderColor: 'rgb(255, 205, 86)',
+                    backgroundColor: 'rgba(255, 205, 86, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: 'ACR (mg/g)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Update risk alerts
+function updateRiskAlerts(alerts) {
+    const alertsDiv = document.getElementById('riskAlerts');
+    
+    if (!alerts || alerts.length === 0) {
+        alertsDiv.innerHTML = `
+            <div class="text-center text-success">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <p class="mb-0">No risk alerts at this time</p>
+            </div>
+        `;
+    } else {
+        alertsDiv.innerHTML = alerts.map(alert => `
+            <div class="alert alert-${alert.severity === 'high' ? 'danger' : alert.severity === 'medium' ? 'warning' : 'info'} mb-2">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <div>
+                        <strong>${alert.title}</strong>
+                        <br><small>${alert.message}</small>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function displayPredictionResults(result) {
+    const resultsDiv = document.getElementById('predictionResults');
+    
+    const ckdStatus = result.ckd_detected ? 'CKD Detected' : 'No CKD';
+    const statusClass = result.ckd_detected ? 'danger' : 'success';
+    const riskClass = result.risk_level === 'High' ? 'danger' : result.risk_level === 'Medium' ? 'warning' : 'success';
+    
+    resultsDiv.innerHTML = `
+        <div class="text-center mb-4">
+            <h4 class="fw-bold">Prediction Results</h4>
+        </div>
+        <div class="row text-center">
+            <div class="col-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">CKD Status</h6>
+                    <span class="badge bg-${statusClass} fs-6">${ckdStatus}</span>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">Stage</h6>
+                    <span class="badge bg-info fs-6">${result.ckd_stage}</span>
+                </div>
+            </div>
+        </div>
+        <div class="row text-center">
+            <div class="col-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">Confidence</h6>
+                    <span class="badge bg-secondary fs-6">${result.confidence ? (result.confidence * 100).toFixed(1) + '%' : 'N/A'}</span>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="mb-3">
+                    <h6 class="text-muted">Risk Level</h6>
+                    <span class="badge bg-${riskClass} fs-6">${result.risk_level}</span>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h6 class="text-muted">Diet Plan</h6>
+            <div class="small">
+                <strong>Breakfast:</strong> ${result.diet_plan.breakfast}<br>
+                <strong>Lunch:</strong> ${result.diet_plan.lunch}<br>
+                <strong>Dinner:</strong> ${result.diet_plan.dinner}<br>
+                <strong>Snacks:</strong> ${result.diet_plan.snacks}
+            </div>
+        </div>
+        <div class="mt-3">
+            <h6 class="text-muted">Exercise Plan</h6>
+            <div class="small">
+                <strong>Daily Activity:</strong> ${result.exercise_plan.daily_activity}<br>
+                <strong>Frequency:</strong> ${result.exercise_plan.frequency}<br>
+                <strong>Intensity:</strong> ${result.exercise_plan.intensity}
+            </div>
+        </div>
+    `;
+}
+
+// Chat functionality
+function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (message) {
+        addMessage('user', message);
+        input.value = '';
+        
+        // Send to AI
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                language: currentLanguage || 'en'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.response) {
+                addMessage('bot', data.response);
+            } else {
+                addMessage('bot', 'Sorry, I encountered an error. Please try again.');
+            }
+        })
+        .catch(error => {
+            addMessage('bot', 'Sorry, I encountered an error. Please try again.');
+        });
+    }
+}
+
+function askQuestion(question) {
+    document.getElementById('chatInput').value = question;
+    sendMessage();
+}
+
+function addMessage(sender, message) {
+    const messagesDiv = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}-message`;
+    
+    const content = document.createElement('div');
+    content.className = 'message-content';
+    content.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${message}`;
+    
+    messageDiv.appendChild(content);
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// Allow Enter key in chat
+document.getElementById('chatInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+// Move focus to next input on Enter
+function focusNextOnEnter(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const inputs = Array.from(document.querySelectorAll('#predictionForm input, #predictionForm select, #predictionForm button'));
+        const idx = inputs.indexOf(e.target);
+        if (idx > -1 && idx + 1 < inputs.length) {
+            inputs[idx + 1].focus();
+        }
+    }
+}
+
+// Show notification function
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function generateReport(predictionId) {
+    console.log('Generating report for:', predictionId);
+    
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Generating...';
+    button.disabled = true;
+    
+    // Use direct download endpoint instead of JSON response
+    const downloadUrl = `/api/download-report/${predictionId}?t=${Date.now()}`;
+    
+    // Create a temporary link element for download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `ckd_report_${predictionId}.pdf`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    
+    // Trigger download
+    link.click();
+    
+    // Clean up
+    setTimeout(() => {
+        document.body.removeChild(link);
+    }, 100);
+    
+    // Show success message
+    showNotification('Report download started!', 'success');
+    console.log('Download initiated');
+    
+    // Restore button state
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.disabled = false;
+    }, 2000);
+}
+
+// Email sending disabled
+</script>
+{% endblock %}
